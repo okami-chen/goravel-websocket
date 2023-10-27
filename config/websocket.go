@@ -7,6 +7,6 @@ import (
 func init() {
 	config := facades.Config()
 	config.Add("websocket", map[string]any{
-		
+		"interval": config.Env("WEBSOCKET_INTERVAL", 10),
 	})
 }

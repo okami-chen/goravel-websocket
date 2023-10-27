@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/okami-chen/goravel-websocket/events"
 	"github.com/okami-chen/goravel-websocket/tools/util"
+	"strconv"
 	"time"
 )
 
@@ -31,7 +32,7 @@ type RetData struct {
 }
 
 // 心跳间隔
-var heartbeatInterval = 10 * time.Second
+var heartbeatInterval = 60 * time.Second
 
 func init() {
 	ToClientChan = make(chan clientInfo, 1000)
@@ -191,7 +192,14 @@ func Render(conn *websocket.Conn, messageId string, sendUserId string, code int,
 // 启动定时器进行心跳检测
 func PingTimer() {
 	go func() {
-		ticker := time.NewTicker(heartbeatInterval)
+		interval := facades.Config().Get("websocket.interval", "10")
+		num, err := strconv.Atoi(interval.(string))
+		if err != nil {
+			facades.Log().Errorf("类型转换失败: %s ", err.Error())
+			return
+		}
+		duration := time.Duration(num) * time.Second
+		ticker := time.NewTicker(duration)
 		defer ticker.Stop()
 		for {
 			<-ticker.C
