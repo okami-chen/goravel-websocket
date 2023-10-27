@@ -31,7 +31,7 @@ type RetData struct {
 }
 
 // 心跳间隔
-var heartbeatInterval = 25 * time.Second
+var heartbeatInterval = 10 * time.Second
 
 func init() {
 	ToClientChan = make(chan clientInfo, 1000)
@@ -162,12 +162,15 @@ func WriteMessage() {
 			if err := Render(conn.Socket, clientInfo.MessageId, clientInfo.SendUserId, clientInfo.Code, clientInfo.Msg, clientInfo.Data); err != nil {
 				Manager.DisConnect <- conn
 				facades.Log().Error("终端设备离线：" + clientInfo.ClientId)
-				//设备离线事件
+				//设备失败事件
 				t := carbon.Now("PRC").ToDateTimeString()
 				events.NewClientMessageFailEvent(conn.UserId, conn.UserId, t, clientInfo.MessageId)
+
+				//设备离线
+				events.NewClientOffloneEvent(conn.UserId, conn.UserId, t)
 			} else {
 				facades.Log().Infof("终端设备消息：%s, 消息编号：%s", clientInfo.ClientId, clientInfo.MessageId)
-				//设备在线事件
+				//设备成功事件
 				t := carbon.Now("PRC").ToDateTimeString()
 				events.NewClientMessageSuccessEvent(conn.UserId, conn.UserId, t, clientInfo.MessageId)
 			}
@@ -197,11 +200,16 @@ func PingTimer() {
 				if err := conn.Socket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(time.Second)); err != nil {
 					Manager.DisConnect <- conn
 					facades.Log().Errorf("发送心跳失败: %s 总连接数：%d", clientId, Manager.Count())
+					t := carbon.Now("PRC").ToDateTimeString()
+					events.NewClientOffloneEvent(conn.UserId, conn.UserId, t)
 				} else {
 					facades.Log().Infof("发送心跳成功: %s 总连接数：%d", clientId, Manager.Count())
 					//设备在线事件
-					t := carbon.Now().ToDateTimeString()
-					events.NewClientKeepLiveEvent(conn.UserId, conn.UserId, t)
+					t := carbon.Now("PRC").ToDateTimeString()
+					e := events.NewClientKeepLiveEvent(conn.UserId, conn.UserId, t)
+					if e != nil {
+						facades.Log().Errorf("NewClientKeepLiveEvent: %s ", e.Error())
+					}
 				}
 			}
 		}

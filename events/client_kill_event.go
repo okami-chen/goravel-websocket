@@ -6,9 +6,6 @@ import (
 )
 
 type ClientKillEvent struct {
-	UserId   string
-	ClientId string
-	Time     string
 }
 
 func NewClientKillEvent(UserId string, ClientId string, Time string) error {
@@ -21,8 +18,5 @@ func NewClientKillEvent(UserId string, ClientId string, Time string) error {
 }
 
 func (receiver *ClientKillEvent) Handle(args []event.Arg) ([]event.Arg, error) {
-	receiver.UserId = args[0].Value.(string)
-	receiver.ClientId = args[1].Value.(string)
-	receiver.Time = args[2].Value.(string)
 	return args, nil
 }

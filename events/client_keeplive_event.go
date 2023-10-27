@@ -6,9 +6,6 @@ import (
 )
 
 type ClientKeepLiveEvent struct {
-	UserId   string
-	ClientId string
-	Time     string
 }
 
 func NewClientKeepLiveEvent(UserId string, ClientId string, Time string) error {
@@ -21,8 +18,5 @@ func NewClientKeepLiveEvent(UserId string, ClientId string, Time string) error {
 }
 
 func (receiver *ClientKeepLiveEvent) Handle(args []event.Arg) ([]event.Arg, error) {
-	receiver.UserId = args[0].Value.(string)
-	receiver.ClientId = args[1].Value.(string)
-	receiver.Time = args[2].Value.(string)
 	return args, nil
 }

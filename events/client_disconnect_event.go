@@ -6,9 +6,6 @@ import (
 )
 
 type ClientDisConnectEvent struct {
-	UserId   string
-	ClientId string
-	Time     uint64
 }
 
 func NewClientDisConnectEvent(UserId string, ClientId string, Time uint64) error {
@@ -21,8 +18,5 @@ func NewClientDisConnectEvent(UserId string, ClientId string, Time uint64) error
 }
 
 func (receiver *ClientDisConnectEvent) Handle(args []event.Arg) ([]event.Arg, error) {
-	receiver.UserId = args[0].Value.(string)
-	receiver.ClientId = args[1].Value.(string)
-	receiver.Time = args[2].Value.(uint64)
 	return args, nil
 }

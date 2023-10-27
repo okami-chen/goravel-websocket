@@ -6,16 +6,8 @@ import (
 )
 
 type ClientMessageSuccessEvent struct {
-	UserId    string
-	ClientId  string
-	Time      string
-	MessageId string
 }
 type ClientMessageFailEvent struct {
-	UserId    string
-	ClientId  string
-	Time      string
-	MessageId string
 }
 
 func NewClientMessageSuccessEvent(userId, clientId, time, messageId string) error {
@@ -29,10 +21,6 @@ func NewClientMessageSuccessEvent(userId, clientId, time, messageId string) erro
 }
 
 func (receiver *ClientMessageSuccessEvent) Handle(args []event.Arg) ([]event.Arg, error) {
-	receiver.UserId = args[0].Value.(string)
-	receiver.ClientId = args[1].Value.(string)
-	receiver.Time = args[2].Value.(string)
-	receiver.MessageId = args[3].Value.(string)
 	return args, nil
 }
 
@@ -47,9 +35,5 @@ func NewClientMessageFailEvent(userId, clientId, time, messageId string) error {
 }
 
 func (receiver *ClientMessageFailEvent) Handle(args []event.Arg) ([]event.Arg, error) {
-	receiver.UserId = args[0].Value.(string)
-	receiver.ClientId = args[1].Value.(string)
-	receiver.Time = args[2].Value.(string)
-	receiver.MessageId = args[3].Value.(string)
 	return args, nil
 }
