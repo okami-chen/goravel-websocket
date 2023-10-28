@@ -21,6 +21,6 @@ func (receiver *ClientConnectListener) Queue(args ...any) event.Queue {
 }
 
 func (receiver *ClientConnectListener) Handle(args ...any) error {
-	facades.Log().Info("client_connect_listener")
+	facades.Log().Debug("client_connect_listener")
 	return nil
 }

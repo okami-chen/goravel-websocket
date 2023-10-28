@@ -54,11 +54,11 @@ func (manager *ClientManager) Start() {
 // 建立连接事件
 func (manager *ClientManager) EventConnect(client *Client) {
 	manager.AddClient(client)
-	facades.Log().Infof("客户端已连接: %s, 客户端总数: %d", client.ClientId, Manager.Count())
+	facades.Log().Debugf("客户端已连接: %s, 客户端总数: %d", client.ClientId, Manager.Count())
 
 	//连接事件
 	t := carbon.Carbon{}.Now("PRC").ToDateTimeString()
-	events.NewClientConnectEvent(client.UserId, client.UserId, t)
+	events.NewClientConnectEvent(client.UserId, client.ClientId, t)
 }
 
 // 断开连接时间
@@ -83,9 +83,9 @@ func (manager *ClientManager) EventDisconnect(client *Client) {
 	}
 
 	t := uint64(time.Now().Unix()) - client.ConnectTime
-	facades.Log().Infof("客户端已断开: %s, 总数: %d, 耗时: %d", client.ClientId, Manager.Count(), t)
+	facades.Log().Debugf("客户端已断开: %s, 总数: %d, 耗时: %d", client.ClientId, Manager.Count(), t)
 	//连接断开事件
-	events.NewClientDisConnectEvent(client.UserId, client.UserId, t)
+	events.NewClientDisConnectEvent(client.UserId, client.ClientId, t)
 
 	//标记销毁
 	client.IsDeleted = true

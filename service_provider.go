@@ -32,13 +32,15 @@ func (receiver *ServiceProvider) Boot(app foundation.Application) {
 
 func (receiver *ServiceProvider) Router() {
 	r := App.MakeRoute()
+
 	r.Prefix("api/websocket").Get("ws", controllers.NewWebsocketController().Server)
+	r.Prefix("api/websocket").Post("bind_to_group", controllers.NewWebsocketController().BindToGroup)
+	r.Prefix("api/websocket").Post("close", controllers.NewWebsocketController().CloseClient)
+	r.Prefix("api/websocket").Post("kick_user", controllers.NewWebsocketController().KickUser)
+	r.Prefix("api/websocket").Post("online_list", controllers.NewWebsocketController().OnelineList)
 	r.Prefix("api/websocket").Post("register", controllers.NewWebsocketController().Register)
 	r.Prefix("api/websocket").Post("send_to_client", controllers.NewWebsocketController().SendToClient)
-	r.Prefix("api/websocket").Post("bind_to_group", controllers.NewWebsocketController().BindToGroup)
-	r.Prefix("api/websocket").Post("send_to_group", controllers.NewWebsocketController().SendToGroup)
-	r.Prefix("api/websocket").Post("online_list", controllers.NewWebsocketController().OnelineList)
-	r.Prefix("api/websocket").Post("kick_user", controllers.NewWebsocketController().KickUser)
+	r.Prefix("api/websocket").Post("send_to_system", controllers.NewWebsocketController().SendToSystem)
 	go servers.Manager.Start()
 	go servers.WriteMessage()
 	servers.PingTimer()

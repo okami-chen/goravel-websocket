@@ -134,7 +134,7 @@ func GetOnlineList(systemId *string, groupName *string) map[string]interface{} {
 
 // 通过本服务器发送信息
 func SendMessage2LocalClient(messageId, clientId string, sendUserId string, code int, msg string, data *string) {
-	//facades.Log().Info("发送到通道：" + clientId)
+	//facades.Log().Debug("发送到通道：" + clientId)
 	ToClientChan <- clientInfo{ClientId: clientId, MessageId: messageId, SendUserId: sendUserId, Code: code, Msg: msg, Data: data}
 	return
 }
@@ -146,11 +146,11 @@ func CloseLocalClient(clientId, systemId string) {
 			return
 		}
 		Manager.DisConnect <- conn
-		facades.Log().Info("主动踢掉客户端：" + clientId)
+		facades.Log().Debug("主动踢掉客户端：" + clientId)
 
 		//连接事件
 		t := carbon.Now("PRC").ToDateTimeString()
-		events.NewClientKillEvent(conn.UserId, conn.UserId, t)
+		events.NewClientKillEvent(conn.UserId, conn.ClientId, t)
 	}
 	return
 }
@@ -165,15 +165,15 @@ func WriteMessage() {
 				facades.Log().Error("终端设备离线：" + clientInfo.ClientId)
 				//设备失败事件
 				t := carbon.Now("PRC").ToDateTimeString()
-				events.NewClientMessageFailEvent(conn.UserId, conn.UserId, t, clientInfo.MessageId)
+				events.NewClientMessageFailEvent(conn.UserId, conn.ClientId, t, clientInfo.MessageId)
 
 				//设备离线
-				events.NewClientOffloneEvent(conn.UserId, conn.UserId, t)
+				events.NewClientOffloneEvent(conn.UserId, conn.ClientId, t)
 			} else {
-				facades.Log().Infof("终端设备消息：%s, 消息编号：%s", clientInfo.ClientId, clientInfo.MessageId)
+				facades.Log().Debugf("终端设备消息：%s, 消息编号：%s", clientInfo.ClientId, clientInfo.MessageId)
 				//设备成功事件
 				t := carbon.Now("PRC").ToDateTimeString()
-				events.NewClientMessageSuccessEvent(conn.UserId, conn.UserId, t, clientInfo.MessageId)
+				events.NewClientMessageSuccessEvent(conn.UserId, conn.ClientId, t, clientInfo.MessageId)
 			}
 		}
 	}
@@ -209,12 +209,12 @@ func PingTimer() {
 					Manager.DisConnect <- conn
 					facades.Log().Errorf("发送心跳失败: %s 总连接数：%d", clientId, Manager.Count())
 					t := carbon.Now("PRC").ToDateTimeString()
-					events.NewClientOffloneEvent(conn.UserId, conn.UserId, t)
+					events.NewClientOffloneEvent(conn.ClientId, conn.ClientId, t)
 				} else {
-					facades.Log().Infof("发送心跳成功: %s 总连接数：%d", clientId, Manager.Count())
+					facades.Log().Debugf("发送心跳成功: %s 总连接数：%d", clientId, Manager.Count())
 					//设备在线事件
 					t := carbon.Now("PRC").ToDateTimeString()
-					e := events.NewClientKeepLiveEvent(conn.UserId, conn.UserId, t)
+					e := events.NewClientKeepLiveEvent(conn.UserId, conn.ClientId, t)
 					if e != nil {
 						facades.Log().Errorf("NewClientKeepLiveEvent: %s ", e.Error())
 					}
