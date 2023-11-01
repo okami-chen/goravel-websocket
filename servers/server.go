@@ -134,7 +134,7 @@ func GetOnlineList(systemId *string, groupName *string) map[string]interface{} {
 
 // 通过本服务器发送信息
 func SendMessage2LocalClient(messageId, clientId string, sendUserId string, code int, msg string, data *string) {
-	//facades.Log().Debug("发送到通道：" + clientId)
+	//facades.Log().Debug("发送到通道：" + clientId + ",msg -> " + *data)
 	ToClientChan <- clientInfo{ClientId: clientId, MessageId: messageId, SendUserId: sendUserId, Code: code, Msg: msg, Data: data}
 	return
 }
@@ -162,7 +162,7 @@ func WriteMessage() {
 		if conn, err := Manager.GetByClientId(clientInfo.ClientId); err == nil && conn != nil {
 			if err := Render(conn.Socket, clientInfo.MessageId, clientInfo.SendUserId, clientInfo.Code, clientInfo.Msg, clientInfo.Data); err != nil {
 				Manager.DisConnect <- conn
-				facades.Log().Error("终端设备离线：" + clientInfo.ClientId)
+				facades.Log().Error("终端设备离线：" + clientInfo.ClientId + ",msg: " + *clientInfo.Data)
 				//设备失败事件
 				t := carbon.Now("PRC").ToDateTimeString()
 				events.NewClientMessageFailEvent(conn.UserId, conn.ClientId, t, clientInfo.MessageId)
@@ -170,7 +170,7 @@ func WriteMessage() {
 				//设备离线
 				events.NewClientOffloneEvent(conn.UserId, conn.ClientId, t)
 			} else {
-				facades.Log().Debugf("终端设备消息：%s, 消息编号：%s", clientInfo.ClientId, clientInfo.MessageId)
+				facades.Log().Debugf("终端设备消息：%s, 消息编号：%s, msg: %s", clientInfo.ClientId, clientInfo.MessageId, *clientInfo.Data)
 				//设备成功事件
 				t := carbon.Now("PRC").ToDateTimeString()
 				events.NewClientMessageSuccessEvent(conn.UserId, conn.ClientId, t, clientInfo.MessageId)
@@ -192,7 +192,7 @@ func Render(conn *websocket.Conn, messageId string, sendUserId string, code int,
 // 启动定时器进行心跳检测
 func PingTimer() {
 	go func() {
-		interval := facades.Config().Get("websocket.interval", "10")
+		interval := facades.Config().Get("websocket.interval", "30")
 		num, err := strconv.Atoi(interval.(string))
 		if err != nil {
 			facades.Log().Errorf("类型转换失败: %s ", err.Error())

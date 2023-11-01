@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/goravel/framework/contracts/http"
 	"github.com/okami-chen/goravel-websocket/servers"
 )
@@ -35,9 +36,18 @@ func (r *WebsocketController) SendToSystem(ctx http.Context) http.Response {
 	sendUserId := ctx.Request().Input("sendUserId")
 	code := ctx.Request().InputInt("code")
 	msg := ctx.Request().Input("msg")
-	data := ctx.Request().Input("data")
 
-	servers.SendMessage2System(systemId, sendUserId, code, msg, data)
+	str := ctx.Request().InputMap("data")
+	bt, e := json.Marshal(str)
+	if e != nil {
+		return ctx.Response().Success().Json(http.Json{
+			"code": 500,
+			"msg":  e.Error(),
+			"data": []string{},
+		})
+	}
+	m := string(bt)
+	servers.SendMessage2System(systemId, sendUserId, code, msg, m)
 
 	return ctx.Response().Success().Json(http.Json{
 		"code": 0,
